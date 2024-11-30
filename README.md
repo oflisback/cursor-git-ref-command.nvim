@@ -37,6 +37,10 @@ The plugin provides the following commands:
 - **`CursorResetCommitMixed`**: Mixed resets to the commit at the cursor location.
 - **`CursorResetCommitHard`**: Hard resets to the commit at the cursor location.
 
+### :test_tube: Development
+
+Tests are using https://github.com/lunarmodules/busted install via `luarocks install --local busted` and add `~/.luarocks/bin` to your PATH. After that run tests via `busted --helper=test_helper.lua tests`.
+
 ### :people_holding_hands: Contributing
 
 Contributions, bug reports and suggestions are very welcome.
