@@ -72,13 +72,39 @@ M.register = function()
 		end
 	end
 
-	local function run_git_command(command, name, target)
+	local function run_git_command(command, name)
 		local result = vim.fn.system(command)
 
 		if vim.v.shell_error ~= 0 then
 			print(name .. " failed:", result)
+		end
+	end
+
+	local function select_sha_or_ref(commit_hash, refs, callback)
+		if #refs > 0 then
+			local options = { commit_hash }
+			for _, ref in ipairs(refs) do
+				table.insert(options, ref)
+			end
+
+			local picker = pickers.new({}, {
+				prompt_title = "Select ref to checkout",
+				finder = finders.new_table({
+					results = options,
+				}),
+				sorter = conf.generic_sorter({}),
+				attach_mappings = function(prompt_bufnr)
+					actions.select_default:replace(function()
+						local selection = action_state.get_selected_entry()
+						actions.close(prompt_bufnr)
+						callback(selection[1])
+					end)
+					return true
+				end,
+			})
+			picker:find()
 		else
-			print(name .. " success:", target)
+			callback(commit_hash)
 		end
 	end
 
@@ -89,42 +115,9 @@ M.register = function()
 			print("No valid commit hash or ref found.")
 			return
 		end
-
-		local selected_ref = nil
-
-		if #refs > 0 then
-			-- Create a list of options including the commit hash and all refs
-			local options = { commit_hash }
-			for _, ref in ipairs(refs) do
-				table.insert(options, ref)
-			end
-
-			-- Show telescope picker
-			local picker = pickers.new({}, {
-				prompt_title = "Select ref to checkout",
-				finder = finders.new_table({
-					results = options,
-				}),
-				sorter = conf.generic_sorter({}),
-				attach_mappings = function(prompt_bufnr)
-					actions.select_default:replace(function()
-						local selection = action_state.get_selected_entry()
-						selected_ref = selection[1]
-						actions.close(prompt_bufnr)
-
-						if selected_ref == nil then
-							return
-						end
-
-						run_git_command(string.format("git checkout %s", selected_ref), "checkout", selected_ref)
-					end)
-					return true
-				end,
-			})
-			picker:find()
-		else
-			run_git_command(string.format("git checkout %s", commit_hash), "checkout", commit_hash)
-		end
+		select_sha_or_ref(commit_hash, refs, function(sha_or_ref)
+			run_git_command(string.format("git checkout %s", sha_or_ref), "checkout")
+		end)
 	end
 end
 
