@@ -4,12 +4,10 @@
 
 All commands operate on the ref (e.g. SHA-1 or branch name) under the cursor position. In that situation you can, for example:
 
-- Cherry-pick a commit from `:G log <another-branch>` and apply it to the current branch using `CursorCherryPickCommit`.
-- Check-out a commit from `:G reflog` to go back to a previous state, for some reason, using `CursorCheckOutCommit`.
-- Drop a commit from `:G log` that you no longer need, for instance when preparing commits for a PR, using `CursorDropCommit`.
-- Reset the current branch to another commit, via `CursorResetCommitSoft`, `CursorResetCommitMixed` or `CursorResetCommitHard`.
-
-Ideally there would also be a `CursorRewordCommit` to rephrase a commit's message, but I haven't found a way to work that functionality into a command similar to the others yet.
+- Cherry-pick a commit from `:G log <another-branch>` and apply it to the current branch using `CursorCherryPick`.
+- Check-out a commit from `:G reflog` to go back to a previous state, for some reason, using `CursorCheckOut`.
+- Drop a commit from `:G log` that you no longer need, for instance when preparing commits for a PR, using `CursorDrop`.
+- Reset the current branch to another commit, via `CursorResetSoft`, `CursorResetMixed` or `CursorResetHard`.
 
 ### :mechanic: Installation
 
@@ -22,6 +20,9 @@ require("lazy").setup({
 	config = function()
 		require("cursor-git-ref-command").setup()
 	end,
+    dependencies = {
+      "nvim-telescope/telescope.nvim"
+    }
   }
 })
 ```
@@ -30,12 +31,12 @@ require("lazy").setup({
 
 The plugin provides the following commands:
 
-- **`CursorCherryPickCommit`**: Cherry-picks the commit at the cursor location.
-- **`CursorCheckOutCommit`**: Checks out the commit at the cursor location.
-- **`CursorDropCommit`**: Drops the commit at the cursor location.
-- **`CursorResetCommitSoft`**: Soft resets to the commit at the cursor location.
-- **`CursorResetCommitMixed`**: Mixed resets to the commit at the cursor location.
-- **`CursorResetCommitHard`**: Hard resets to the commit at the cursor location.
+- **`CursorCherryPick`**: Cherry-picks the commit at the cursor location.
+- **`CursorCheckOut`**: Checks out the commit at the cursor location.
+- **`CursorDrop`**: Drops the commit at the cursor location.
+- **`CursorResetSoft`**: Soft resets to the commit at the cursor location.
+- **`CursorResetMixed`**: Mixed resets to the commit at the cursor location.
+- **`CursorResetHard`**: Hard resets to the commit at the cursor location.
 
 ### :test_tube: Development
 

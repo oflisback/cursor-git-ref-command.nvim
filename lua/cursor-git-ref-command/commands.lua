@@ -70,11 +70,11 @@ M.register = function()
 	end
 end
 
-vim.cmd("command! CursorCherryPickCommit lua CherryPick()")
-vim.cmd("command! CursorCheckOutCommit lua CheckOut()")
-vim.cmd("command! CursorDropCommit lua Drop()")
-vim.cmd("command! CursorResetCommitSoft lua Reset(GitResetModes.SOFT)")
-vim.cmd("command! CursorResetCommitMixed lua Reset(GitResetModes.MIXED)")
-vim.cmd("command! CursorResetCommitHard lua Reset(GitResetModes.HARD)")
+vim.cmd("command! CursorCherryPick lua CherryPick()")
+vim.cmd("command! CursorCheckOut lua CheckOut()")
+vim.cmd("command! CursorDrop lua Drop()")
+vim.cmd("command! CursorResetSoft lua Reset(GitResetModes.SOFT)")
+vim.cmd("command! CursorResetMixed lua Reset(GitResetModes.MIXED)")
+vim.cmd("command! CursorResetHard lua Reset(GitResetModes.HARD)")
 
 return M
