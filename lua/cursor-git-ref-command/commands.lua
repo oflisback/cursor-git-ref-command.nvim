@@ -1,23 +1,20 @@
 local M = {}
-local pickers = require("telescope.pickers")
-local finders = require("telescope.finders")
-local conf = require("telescope.config").values
-local actions = require("telescope.actions")
-local action_state = require("telescope.actions.state")
 local extract = require("cursor-git-ref-command.extract")
+local pick = require("cursor-git-ref-command.pick")
 
 M.register = function()
+	local function run_git_command(command, name)
+		local result = vim.fn.system(command)
+
+		if vim.v.shell_error ~= 0 then
+			print(name .. " failed:", result)
+		end
+	end
+
 	function CherryPick()
 		local commit_hash, _ = extract.cursor_hash_and_refs()
 
-		local cherry_pick_cmd = string.format("git cherry-pick %s", commit_hash)
-		local result = vim.fn.system(cherry_pick_cmd)
-
-		if vim.v.shell_error ~= 0 then
-			print("Failed to cherry-pick commit:", result)
-		else
-			print("Cherry-picked commit:", commit_hash)
-		end
+		run_git_command(string.format("git cherry-pick %s", commit_hash), "cherry-pick")
 	end
 
 	function Drop()
@@ -38,14 +35,7 @@ M.register = function()
 			return
 		end
 
-		local rebase_onto_cmd = string.format("git rebase --onto %s %s", parent_commit, commit_hash)
-		local result = vim.fn.system(rebase_onto_cmd)
-
-		if vim.v.shell_error ~= 0 then
-			print("Failed to drop commit:", result)
-		else
-			print("Dropped commit:", commit_hash)
-		end
+		run_git_command(string.format("git rebase --onto %s %s", parent_commit, commit_hash), "drop")
 	end
 
 	GitResetModes = {
@@ -55,57 +45,16 @@ M.register = function()
 	}
 
 	function Reset(mode)
-		local commit_hash, _ = extract.cursor_hash_and_refs()
+		local commit_hash, refs = extract.cursor_hash_and_refs()
 
 		if not commit_hash or commit_hash == "" then
 			print("No valid commit hash provided.")
 			return
 		end
 
-		local reset_cmd = string.format("git reset --%s %s", mode, commit_hash)
-		local result = vim.fn.system(reset_cmd)
-
-		if vim.v.shell_error ~= 0 then
-			print("Failed to reset to commit:", result)
-		else
-			print(string.format("Reset %s to commit: %s", mode, commit_hash))
-		end
-	end
-
-	local function run_git_command(command, name)
-		local result = vim.fn.system(command)
-
-		if vim.v.shell_error ~= 0 then
-			print(name .. " failed:", result)
-		end
-	end
-
-	local function select_sha_or_ref(commit_hash, refs, callback)
-		if #refs > 0 then
-			local options = { commit_hash }
-			for _, ref in ipairs(refs) do
-				table.insert(options, ref)
-			end
-
-			local picker = pickers.new({}, {
-				prompt_title = "Select ref to checkout",
-				finder = finders.new_table({
-					results = options,
-				}),
-				sorter = conf.generic_sorter({}),
-				attach_mappings = function(prompt_bufnr)
-					actions.select_default:replace(function()
-						local selection = action_state.get_selected_entry()
-						actions.close(prompt_bufnr)
-						callback(selection[1])
-					end)
-					return true
-				end,
-			})
-			picker:find()
-		else
-			callback(commit_hash)
-		end
+		pick.sha_or_ref(commit_hash, refs, function(sha_or_ref)
+			run_git_command(string.format("git reset --%s %s", mode, sha_or_ref), "reset")
+		end)
 	end
 
 	function CheckOut()
@@ -115,7 +64,7 @@ M.register = function()
 			print("No valid commit hash or ref found.")
 			return
 		end
-		select_sha_or_ref(commit_hash, refs, function(sha_or_ref)
+		pick.sha_or_ref(commit_hash, refs, function(sha_or_ref)
 			run_git_command(string.format("git checkout %s", sha_or_ref), "checkout")
 		end)
 	end
