@@ -46,6 +46,23 @@ require("lazy").setup({
 })
 ```
 
+It's also possible to use the plugin without Telescope by providing a custom picker, here's an example of a dummy picker that always returns the commit_sha:
+
+```
+require("lazy").setup({
+  {
+    "oflisback/cursor-git-ref-command.nvim",
+	config = function()
+		require("cursor-git-ref-command").setup({
+			pick_sha_or_ref = function(commit_hash, refs, callback)
+				callback(commit_hash)
+			end,
+		})
+	end,
+  }
+})
+```
+
 ### :keyboard: Commands
 
 The plugin provides the following commands:

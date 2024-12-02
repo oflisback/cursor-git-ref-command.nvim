@@ -1,8 +1,7 @@
 local M = {}
 local extract = require("cursor-git-ref-command.extract")
-local pick = require("cursor-git-ref-command.pick")
 
-M.register = function()
+M.register = function(configuration)
 	local function run_git_command(command, name)
 		local result = vim.fn.system(command)
 
@@ -52,9 +51,16 @@ M.register = function()
 			return
 		end
 
-		pick.sha_or_ref(commit_hash, refs, function(sha_or_ref)
+		local function git_reset(sha_or_ref)
 			run_git_command(string.format("git reset --%s %s", mode, sha_or_ref), "reset")
-		end)
+		end
+
+		if configuration.pick_sha_or_ref then
+			configuration.pick_sha_or_ref(commit_hash, refs, git_reset)
+		else
+			local pick = require("cursor-git-ref-command.pick")
+			pick.sha_or_ref(commit_hash, refs, git_reset)
+		end
 	end
 
 	function CheckOut()
@@ -64,9 +70,17 @@ M.register = function()
 			print("No valid commit hash or ref found.")
 			return
 		end
-		pick.sha_or_ref(commit_hash, refs, function(sha_or_ref)
+
+		local function git_checkout(sha_or_ref)
 			run_git_command(string.format("git checkout %s", sha_or_ref), "checkout")
-		end)
+		end
+
+		if configuration.pick_sha_or_ref then
+			configuration.pick_sha_or_ref(commit_hash, refs, git_checkout)
+		else
+			local pick = require("cursor-git-ref-command.pick")
+			pick.sha_or_ref(commit_hash, refs, git_checkout)
+		end
 	end
 end
 
