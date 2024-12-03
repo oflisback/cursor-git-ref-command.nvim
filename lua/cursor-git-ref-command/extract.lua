@@ -24,6 +24,11 @@ function extract.refs(line)
 			ref = target_ref
 		end
 
+		local tag_prefix = "tag: "
+		if string.sub(ref, 1, #tag_prefix) == tag_prefix then
+			ref = string.sub(ref, #tag_prefix + 1)
+		end
+
 		if ref ~= "HEAD" and ref ~= "origin/HEAD" then
 			table.insert(refs, ref)
 		end

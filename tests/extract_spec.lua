@@ -12,9 +12,9 @@ describe("extract", function()
 
 	it("should extract refs on line but ignore HEAD -> main and origin/HEAD", function()
 		assert.are.same(
-			{ "main", "origin/main", "origin/create-pull-request/patch" },
+			{ "main", "some-random-branch", "origin/main", "origin/create-pull-request/patch" },
 			extract.refs(
-				"commit c6f6fb178ebe9b4fd90383de743c3399f8c3a37c (HEAD -> main, origin/main, origin/create-pull-request/patch, origin/HEAD)"
+				"commit c6f6fb178ebe9b4fd90383de743c3399f8c3a37c (HEAD -> main, some-random-branch, origin/main, origin/create-pull-request/patch, origin/HEAD)"
 			)
 		)
 		assert.are.same({}, extract.refs("commit c6f6fb178ebe9b4fd90383de743c3399f8c3a37c"))
@@ -27,5 +27,19 @@ describe("extract", function()
 		assert.are.same(commit, extract.cursor_hash(line, 0))
 		assert.are.same(commit, extract.cursor_hash(line, 10))
 		assert.are.same(commit, extract.cursor_hash(line, 40))
+	end)
+
+	it("should extract tag", function()
+		local commit = "0da890a2"
+		local tag = "mytag"
+		local line = commit .. " (tag: " .. tag .. ")"
+		assert.are.same({ "mytag" }, extract.refs(line))
+	end)
+
+	it("should extract sha", function()
+		local line = "113990c (origin/main, origin/HEAD) HEAD@{1}: commit (amend): Config"
+		local commit = "113990c"
+		assert.are.same({ "origin/main" }, extract.refs(line))
+		assert.are.same(commit, extract.cursor_hash(line, 0))
 	end)
 end)
