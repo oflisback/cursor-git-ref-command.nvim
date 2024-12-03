@@ -47,7 +47,6 @@ M.register = function(configuration)
 		local commit_hash, refs = extract.cursor_hash_and_refs()
 
 		if not commit_hash or commit_hash == "" then
-			print("No valid commit hash provided.")
 			return
 		end
 
@@ -67,7 +66,6 @@ M.register = function(configuration)
 		local commit_hash, refs = extract.cursor_hash_and_refs()
 
 		if not commit_hash or commit_hash == "" then
-			print("No valid commit hash or ref found.")
 			return
 		end
 

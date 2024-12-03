@@ -71,11 +71,12 @@ function extract.cursor_hash_and_refs()
 
 	local commit_hash = extract.cursor_hash(line, col)
 
-	local validate_commit_cmd = string.format("git cat-file -e %s 2>/dev/null", commit_hash)
+	local validate_commit_cmd = string.format("git cat-file -e %s", commit_hash)
 	local is_valid_commit = vim.fn.system(validate_commit_cmd) == ""
 
 	if not is_valid_commit then
-		print("Invalid commit hash or not within a valid git repository: " .. commit_hash)
+		print("Invalid commit sha/ref or not within a git repo" .. (commit_hash == "" and "." or ": " .. commit_hash))
+
 		return nil, {}
 	end
 
